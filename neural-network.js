@@ -16,9 +16,14 @@ async function loadModel() {
         console.log(chalk.yellow('Model loaded successfully'));
     } else {
         // Train a new model if it doesn't exist
+        const trainingData = await getTrainingData();
+        if (!trainingData.length) {
+            console.error(chalk.red('Error: No training data found'));
+            process.exit(1);
+        }
         net = new brain.recurrent.LSTM({ gpu: true }); // Honestly I'm pretty sure gpu: true does nothing but whatever
         console.log(chalk.green(new Intl.DateTimeFormat('default', {  hour12: true, hour: 'numeric', minute: 'numeric' }).format(new Date())) + ' | Training model...');
-        net.train(await getTrainingData(), {
+        net.train(trainingData, {
             iterations: 300, // NOTE - no clue what the ideal number of iterations is, you might wanna change this
             log: (stats) => console.log(chalk.green(new Intl.DateTimeFormat('default', {  hour12: true, hour: 'numeric', minute: 'numeric' }).format(new Date())) + ' | ' + stats), // Log the progress of training
             errorThresh: 0.05,
